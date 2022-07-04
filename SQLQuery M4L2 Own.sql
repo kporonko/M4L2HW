@@ -27,8 +27,32 @@ DELETE FROM Person.Person
 DELETE FROM Person.Person WHERE PersonType = 'IN' AND FirstName LIKE '%asa%' 
 
 BEGIN TRANSACTION
-SELECT * FROM Person.EmailAddress WHERE EmailAddress.EmailAddress LIKE '%igail2%'
-DELETE TOP(3) FROM Person.EmailAddress WHERE EmailAddress LIKE '%igail2%'
-SELECT * FROM Person.EmailAddress WHERE EmailAddress.EmailAddress LIKE '%igail2%'
+BEGIN TRY
+	SELECT * FROM Person.EmailAddress WHERE EmailAddress.EmailAddress LIKE '%igail3%'
+	DELETE TOP(3) FROM Person.EmailAddress WHERE EmailAddress LIKE '%igail3%'
+END TRY
+BEGIN CATCH
+	BEGIN
+		ROLLBACK TRANSACTION
+	END
+	SELECT * FROM Person.EmailAddress WHERE EmailAddress.EmailAddress LIKE '%igail3%'
+END CATCH
 COMMIT TRANSACTION 
 
+BEGIN TRANSACTION
+BEGIN TRY
+	DECLARE @CNT INT 
+	SELECT @CNT = COUNT(Person.EmailAddress.EmailAddressID) FROM Person.EmailAddress WHERE EmailAddress.EmailAddress LIKE '%igail4%'
+
+	DELETE FROM Person.EmailAddress WHERE EmailAddress LIKE '%igail4%'
+	SELECT * FROM Person.EmailAddress WHERE EmailAddress.EmailAddress LIKE '%igail4%'
+
+	IF @CNT > 3
+	BEGIN
+		ROLLBACK TRANSACTION
+	END
+END TRY
+BEGIN CATCH
+	SELECT * FROM Person.EmailAddress WHERE EmailAddress.EmailAddress LIKE '%igail4%'
+END CATCH
+COMMIT TRANSACTION
